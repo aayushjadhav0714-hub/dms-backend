@@ -152,17 +152,34 @@
         </div>
     </div>
 </body>
+<!-- Supabase Library (MUST be before using supabase) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+/* ================================
+   SUPABASE CONFIG
+================================ */
 const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
+
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+/* ================================
+   LOAD USERS FUNCTION
+================================ */
 async function loadUsers() {
+
     const tableBody = document.querySelector("tbody");
 
+    // Loading state
+    tableBody.innerHTML =
+        "<tr><td colspan='3' style='text-align:center;'>Loading data...</td></tr>";
+
     try {
-        const { data: allUsers, error } = await _supabase
-            .from('Report')   // 👈 same table
+
+        const { data, error } = await _supabase
+            .from('Report')        // Make sure table name EXACT same aahe
             .select('*')
             .order('id', { ascending: false });
 
@@ -170,27 +187,39 @@ async function loadUsers() {
 
         tableBody.innerHTML = "";
 
-        if (allUsers.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No users registered yet.</td></tr>";
+        if (!data || data.length === 0) {
+            tableBody.innerHTML =
+                "<tr><td colspan='3' style='text-align:center;'>No users found.</td></tr>";
             return;
         }
 
-        allUsers.forEach(user => {
+        data.forEach(user => {
+
             const row = `
                 <tr>
-                    <td>${user.fullname}</td>
-                    <td>${user.mobile}</td>
-                    <td>${user.location}</td>
-                </tr>`;
+                    <td>${user.fullname || '-'}</td>
+                    <td>${user.mobile || '-'}</td>
+                    <td>${user.location || '-'}</td>
+                </tr>
+            `;
+
             tableBody.innerHTML += row;
         });
 
-    } catch (error) {
-        console.error(error);
-        tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Error loading data!</td></tr>";
+    } catch (err) {
+
+        console.error("Supabase Error:", err);
+
+        tableBody.innerHTML =
+            "<tr><td colspan='3' style='text-align:center;color:red;'>Error loading data. Check console.</td></tr>";
     }
 }
 
-window.onload = loadUsers;
+
+/* ================================
+   PAGE LOAD
+================================ */
+window.addEventListener("DOMContentLoaded", loadUsers);
+
 </script>
 </html>
