@@ -16,31 +16,31 @@
             --text-dark: #2c3e50; 
             --white: #ffffff; 
         }
-        /* ... (तुझा बाकी CSS कोड तसाच राहू दे) ... */
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: var(--bg-light); color: var(--text-dark); }
+        * { box-sizing: border-box; font-family: "Segoe UI", sans-serif; }
+        body { margin: 0; background-color: var(--bg-light); color: var(--text-dark); }
         header { background-color: var(--primary); color: var(--white); padding: 16px 30px; display: flex; justify-content: space-between; align-items: center; }
         .content { display: flex; min-height: calc(100vh - 70px); }
         .sidebar { width: 220px; background-color: var(--secondary); padding: 20px 0; color: var(--white); }
-        .sidebar h3 { padding: 12px 20px; cursor: pointer; transition: 0.2s; font-weight: 500; margin: 0; }
+        .sidebar h3 { padding: 12px 20px; cursor: pointer; transition: 0.2s; font-weight: 500; margin: 0; font-size: 16px; }
         .sidebar h3:hover { background-color: var(--accent); }
         .data { padding: 24px; width: 100%; }
-        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; border-left: 5px solid var(--secondary); }
-        .card:hover { transform: translateY(-5px); }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 5px solid var(--secondary); }
         .card h3 { font-size: 14px; color: #7f8c8d; margin: 0; }
         .card h1 { font-size: 28px; margin: 10px 0; color: var(--primary); }
-        .status-label { font-size: 12px; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: var(--primary); color: white; }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--secondary); }
     </style>
 </head>
 <body>
 
     <header>
         <div class="left-side">Emergency Response System</div>
-        <div class="right-side"><button onclick="location.href='index.html'" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Logout</button></div>
+        <div class="right-side">
+            <button onclick="location.href='index.html'" style="background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Logout</button>
+        </div>
     </header>
 
     <div class="content">
@@ -59,25 +59,18 @@
                 <div class="card" style="border-left-color: #e67e22;">
                     <h3>🚨 Recent Incidents (24h)</h3>
                     <h1 id="recent-count">0</h1>
-                    <span class="status-label" style="color: #e67e22;">New alerts today</span>
                 </div>
-
                 <div class="card" style="border-left-color: #27ae60;">
                     <h3>📄 Total Reports</h3>
                     <h1 id="report-count">0</h1>
-                    <span class="status-label" style="color: #27ae60;">All records</span>
                 </div>
-
                 <div class="card" style="border-left-color: #2980b9;">
                     <h3>👥 Total Users</h3>
                     <h1 id="user-count">0</h1>
-                    <span class="status-label" style="color: #2980b9;">Citizens registered</span>
                 </div>
-
                 <div class="card" style="border-left-color: #8e44ad;">
                     <h3>📍 Affected Areas</h3>
                     <h1 id="location-count">0</h1>
-                    <span class="status-label" style="color: #8e44ad;">Unique locations</span>
                 </div>
             </div>
 
@@ -91,67 +84,70 @@
                         <th>Time</th>
                     </tr>
                 </thead>
-                <tbody id="activity-table"></tbody>
+                <tbody id="activity-table">
+                    <tr><td colspan="4" class="loading">Data load hot aahe...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // 2. Supabase Setup
-        const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co'; // Project Settings -> API मध्ये मिळेल
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function updateDashboard() {
             try {
-                // 3. 'Report' टेबलमधून डेटा आणणे (MySQL fetch ऐवजी)
+                // 'Report' टेबलमधून डेटा आणणे
                 const { data: reports, error } = await _supabase
-                    .from('Report')
+                    .from('Report') 
                     .select('*')
                     .order('id', { ascending: false });
 
-                if (error) throw error;
+                if (error) {
+                    console.error("Supabase Error:", error.message);
+                    document.getElementById("activity-table").innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error: ${error.message}. Policy check kara!</td></tr>`;
+                    return;
+                }
 
-                // Total Reports Count
+                // 1. Total Reports
                 document.getElementById("report-count").innerText = reports.length;
 
-                // Recent 24 Hours Logic
+                // 2. Recent 24 Hours Logic
                 const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
                 const recentOnes = reports.filter(r => new Date(r.datetime) > oneDayAgo).length;
                 document.getElementById("recent-count").innerText = recentOnes;
 
-                // Unique Locations Logic
+                // 3. Unique Locations Logic
                 const uniqueLocs = [...new Set(reports.map(r => r.location))].filter(l => l && l !== 'N/A').length;
                 document.getElementById("location-count").innerText = uniqueLocs;
 
-                // Update Table (Last 5 records)
+                // 4. Table Update
                 const tbody = document.getElementById("activity-table");
                 tbody.innerHTML = ""; 
 
                 if (reports.length === 0) {
-                    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No data available</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Ajun kontahi report nahiye.</td></tr>";
                 } else {
-                    reports.slice(0, 5).forEach(r => {
+                    reports.slice(0, 8).forEach(r => {
                         tbody.innerHTML += `
                             <tr>
-                                <td>${r.fullname || 'N/A'}</td>
-                                <td>${r.mobile || 'N/A'}</td>
-                                <td>${r.location || 'N/A'}</td>
-                                <td>${r.datetime || 'N/A'}</td>
+                                <td>${r.fullname || 'Unknown'}</td>
+                                <td>${r.mobile || '-'}</td>
+                                <td>${r.location || 'Not Set'}</td>
+                                <td>${r.datetime || '-'}</td>
                             </tr>
                         `;
                     });
                 }
-
-                // (Optional) Users count साठी दुसरा टेबल असेल तर इथून आणा
-                // तूर्तास हे ० राहील जोपर्यंत युजर्सचा टेबल सेट करत नाही
-                document.getElementById("user-count").innerText = "0";
 
             } catch (err) {
                 console.error("Dashboard update error:", err.message);
             }
         }
 
+        // Page load zalyavar function run kara
         window.onload = updateDashboard;
     </script>
 </body>
