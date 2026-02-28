@@ -153,38 +153,44 @@
     </div>
 </body>
 <script>
-   
-    async function loadUsers() {
-        const tableBody = document.querySelector("tbody");
-        
-        try {
-            // Server kadun Users chi list fetch kara
-            const response = await fetch('http://localhost:3000/get-users');
-            const allUsers = await response.json();
+const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            tableBody.innerHTML = ""; // Juna dummy data kadha
+async function loadUsers() {
+    const tableBody = document.querySelector("tbody");
 
-            if (allUsers.length === 0) {
-                tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No users registered yet.</td></tr>";
-                return;
-            }
+    try {
+        const { data: allUsers, error } = await _supabase
+            .from('Report')   // 👈 same table
+            .select('*')
+            .order('id', { ascending: false });
 
-            allUsers.forEach(user => {
-                const row = `
-                    <tr>
-                        <td>${user.fullname}</td>
-                        <td>${user.mobile}</td>
-                        <td>${user.location}</td>
-                    </tr>`;
-                tableBody.innerHTML += row;
-            });
-        } catch (error) {
-            console.error("Error:", error);
-            tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Server connected nahiye!</td></tr>";
+        if (error) throw error;
+
+        tableBody.innerHTML = "";
+
+        if (allUsers.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>No users registered yet.</td></tr>";
+            return;
         }
-    }
 
-    // Page load jhalyavar function call kara
-    window.onload = loadUsers;
+        allUsers.forEach(user => {
+            const row = `
+                <tr>
+                    <td>${user.fullname}</td>
+                    <td>${user.mobile}</td>
+                    <td>${user.location}</td>
+                </tr>`;
+            tableBody.innerHTML += row;
+        });
+
+    } catch (error) {
+        console.error(error);
+        tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Error loading data!</td></tr>";
+    }
+}
+
+window.onload = loadUsers;
 </script>
 </html>
