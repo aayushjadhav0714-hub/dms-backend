@@ -118,81 +118,112 @@
     </div>
 
 <script>
-    const { jsPDF } = window.jspdf;
+const { jsPDF } = window.jspdf;
 
-    async function loadLogs() {
-        const tableBody = document.getElementById("tableBody");
-        
-        try {
-            // Server kadun reports chi list ghyaychi
-            const response = await fetch('http://localhost:3000/get-logs');
-            const logs = await response.json();
+/* =========================
+   SUPABASE CONFIG
+========================= */
+const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            tableBody.innerHTML = ""; 
+/* =========================
+   LOAD LOGS FROM SUPABASE
+========================= */
+async function loadLogs() {
 
-            if (logs.length === 0) {
-                tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No logs available.</td></tr>";
-                return;
-            }
+    const tableBody = document.getElementById("tableBody");
 
-            logs.forEach(log => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${log.fullname}</td>
-                    <td>${log.mobile}</td>
-                    <td>${log.location}</td>
-                    <td>${log.datetime}</td>
+    tableBody.innerHTML =
+        "<tr><td colspan='5' style='text-align:center;'>Loading logs...</td></tr>";
+
+    try {
+
+        const { data, error } = await supa
+            .from('Report')   // same table name
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) throw error;
+
+        tableBody.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            tableBody.innerHTML =
+                "<tr><td colspan='5' style='text-align:center;'>No logs available.</td></tr>";
+            return;
+        }
+
+        data.forEach(log => {
+
+            const row = `
+                <tr>
+                    <td>${log.fullname || '-'}</td>
+                    <td>${log.mobile || '-'}</td>
+                    <td>${log.location || '-'}</td>
+                    <td>${log.datetime || '-'}</td>
                     <td>
-                        <button class="btn-pdf" onclick="generatePDF('${log.fullname}', '${log.mobile}', '${log.location}', '${log.datetime}')">
-                            <i class="fas fa-file-pdf"></i> Download PDF
+                        <button class="btn-pdf"
+                        onclick="generatePDF(
+                            '${log.fullname}',
+                            '${log.mobile}',
+                            '${log.location}',
+                            '${log.datetime}'
+                        )">
+                        <i class="fas fa-file-pdf"></i> Download PDF
                         </button>
                     </td>
-                `;
-                tableBody.innerHTML += row.outerHTML;
-            });
-        } catch (error) {
-            console.error("Fetch error:", error);
-            tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Server connected nahiye! Node.js chalu kara.</td></tr>";
-        }
-    }
+                </tr>
+            `;
 
-    // PDF Banavnyache Logic
-    function generatePDF(name, mobile, location, time) {
-        const doc = new jsPDF();
-
-        // Header Title
-        doc.setFontSize(20);
-        doc.setTextColor(11, 60, 93); // Primary Blue color
-        doc.text("Disaster Incident Report", 14, 22);
-        
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text(`System Log ID: ${Math.floor(Math.random() * 10000)}`, 14, 30);
-        doc.text(`Download Date: ${new Date().toLocaleString()}`, 14, 35);
-
-        // Incident Details Table
-        const tableData = [
-            ["Reporter Name", name],
-            ["Contact Number", mobile],
-            ["Incident Location", location],
-            ["Time of Report", time],
-            ["Status", "Logged"]
-        ];
-
-        doc.autoTable({
-            startY: 45,
-            head: [['Field Name', 'Information']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: { fillColor: [11, 60, 93] },
-            styles: { fontSize: 11 }
+            tableBody.innerHTML += row;
         });
 
-        // Save PDF
-        doc.save(`Report_${name.replace(/\s+/g, '_')}.pdf`);
-    }
+    } catch (err) {
 
-    window.onload = loadLogs;
+        console.error("Supabase Error:", err);
+
+        tableBody.innerHTML =
+            "<tr><td colspan='5' style='text-align:center; color:red;'>Error loading logs. Check console.</td></tr>";
+    }
+}
+
+/* =========================
+   PDF GENERATOR
+========================= */
+function generatePDF(name, mobile, location, time) {
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.setTextColor(11, 60, 93);
+    doc.text("Disaster Incident Report", 14, 22);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Download Date: ${new Date().toLocaleString()}`, 14, 30);
+
+    const tableData = [
+        ["Reporter Name", name],
+        ["Contact Number", mobile],
+        ["Incident Location", location],
+        ["Time of Report", time],
+        ["Status", "Logged"]
+    ];
+
+    doc.autoTable({
+        startY: 40,
+        head: [['Field Name', 'Information']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [11, 60, 93] },
+        styles: { fontSize: 11 }
+    });
+
+    doc.save(`Report_${name.replace(/\s+/g, '_')}.pdf`);
+}
+
+window.addEventListener("DOMContentLoaded", loadLogs);
 </script>
 </body>
 </html>
