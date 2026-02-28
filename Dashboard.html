@@ -54,6 +54,8 @@
             <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
             <h3 onclick="location.href='Reports.html'">Reports</h3>
             <h3 onclick="location.href='Users.html'">Users</h3>
+            <h3 onclick="location.href='setting.html'">System Settings</h3>
+            <h3 onclick="location.href='Logs.html'">Logs</h3>
         </div>
 
         <div class="data">
@@ -100,61 +102,103 @@
             </table>
         </div>
     </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script>
-        async function updateDashboard() {
-            try {
-                // 1. Fetch Reports from MySQL via Node.js
-                const reportRes = await fetch("http://localhost:3000/get-reports");
-                const reports = await reportRes.json();
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-                // Total Reports Count
-                document.getElementById("report-count").innerText = reports.length;
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
 
-                // Recent 24 Hours Logic
-                const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-                const recentOnes = reports.filter(r => new Date(r.datetime) > oneDayAgo).length;
-                document.getElementById("recent-count").innerText = recentOnes;
+    const SUPABASE_URL = "https://idogfmuksxbjjmrfdclk.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs";
 
-                // --- AFFECTED AREAS LOGIC (Unique Locations) ---
-                // map() sarv locations kadhte, Set() duplicate kadhun takte
-                const uniqueLocs = [...new Set(reports.map(r => r.location))].filter(l => l && l !== 'N/A').length;
-                document.getElementById("location-count").innerText = uniqueLocs;
+    const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                // Update Recent Activities Table (Last 5 records)
-                const tbody = document.getElementById("activity-table");
-                tbody.innerHTML = ""; // Clear existing
+    try {
 
-                if(reports.length === 0) {
-                    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No data available</td></tr>";
-                } else {
-                    // Reverse karun top 5 dakhva
-                    reports.slice(-5).reverse().forEach(r => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${r.fullname || 'N/A'}</td>
-                                <td>${r.mobile || 'N/A'}</td>
-                                <td>${r.location || 'N/A'}</td>
-                                <td>${r.datetime || 'N/A'}</td>
-                            </tr>
-                        `;
-                    });
-                }
+        const { data: reports, error } = await supa
+            .from("Report")
+            .select("*")
+            .order("id", { ascending: false });
 
-                // 2. Fetch Users Count
-                const userRes = await fetch("http://localhost:3000/get-users");
-                if (userRes.ok) {
-                    const users = await userRes.json();
-                    document.getElementById("user-count").innerText = users.length;
-                }
+        if (error) throw error;
 
-            } catch (err) {
-                console.error("Dashboard update karnyant error:", err);
-            }
+        const allReports = reports || [];
+
+        /* =========================
+           TOTAL REPORTS
+        ========================= */
+        document.getElementById("report-count").innerText = allReports.length;
+
+        /* =========================
+           LAST 24 HOURS
+        ========================= */
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const recentCount = allReports.filter(r =>
+            r.datetime && new Date(r.datetime) > oneDayAgo
+        ).length;
+
+        document.getElementById("recent-count").innerText = recentCount;
+
+        /* =========================
+           TOTAL UNIQUE USERS
+           (Based on mobile number)
+        ========================= */
+        const uniqueUsers = [
+            ...new Set(
+                allReports
+                    .map(r => r.mobile)
+                    .filter(Boolean)
+            )
+        ];
+
+        document.getElementById("user-count").innerText = uniqueUsers.length;
+
+        /* =========================
+           UNIQUE LOCATIONS
+        ========================= */
+        const uniqueLocations = [
+            ...new Set(
+                allReports
+                    .map(r => r.location)
+                    .filter(loc => loc && loc !== "N/A")
+            )
+        ];
+
+        document.getElementById("location-count").innerText = uniqueLocations.length;
+
+        /* =========================
+           RECENT 5 ACTIVITIES
+        ========================= */
+        const tbody = document.getElementById("activity-table");
+        tbody.innerHTML = "";
+
+        if (allReports.length === 0) {
+
+            tbody.innerHTML =
+                "<tr><td colspan='4' style='text-align:center;'>No data available</td></tr>";
+
+        } else {
+
+            allReports.slice(0, 5).forEach(r => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.fullname || "-"}</td>
+                        <td>${r.mobile || "-"}</td>
+                        <td>${r.location || "-"}</td>
+                        <td>${r.datetime || "-"}</td>
+                    </tr>
+                `;
+            });
         }
 
-        // Page load jhalyavar function call kara
-        window.onload = updateDashboard;
-    </script>
+    } catch (err) {
+        console.error("Dashboard Error:", err);
+    }
+
+});
+</script>
 </body>
 </html>
