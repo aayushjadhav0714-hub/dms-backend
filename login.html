@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login</title>
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg,#0b3c5d, #1d70a2);
+}
+
+.login-container {
+    background: #fff;
+    padding: 60px;
+    width: 650px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* LOGO STYLE */
+.logo {
+    width: 120px;
+    margin-bottom: 15px;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #0b3c5d;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background:#0b3c5d;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    background: #0e4b74;
+}
+
+.footer-text {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #777;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <!-- LOGO ADDED HERE -->
+    <img src="dssm.png" class="logo" alt="Logo">
+
+    <h2>Admin Login</h2>
+
+    <form id="loginForm">
+
+        <div class="input-group">
+
+            <label>Email</label>
+
+            <input 
+                type="email" 
+                name="email" 
+                placeholder="Enter your email" 
+                required
+            >
+
+        </div>
+
+        <div class="input-group">
+
+            <label>Password</label>
+
+            <input 
+                type="password" 
+                name="password" 
+                placeholder="Enter your password" 
+                required
+            >
+
+        </div>
+
+        <button type="submit" class="login-btn">
+
+            Login
+
+        </button>
+
+    </form>
+
+    <div class="footer-text">
+
+        Disaster Management System
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
