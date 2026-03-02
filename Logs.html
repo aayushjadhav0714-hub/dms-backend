@@ -3,116 +3,81 @@
 <head>
     <title>Disaster Management Dashboard - Logs</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root {
-            --primary: #0b3c5d;
-            --secondary: #1d70a2;
-            --accent: #c0392b;
-            --bg-light: #f4f6f8;
-            --text-dark: #2c3e50;
-            --white: #ffffff;
-            --pdf-btn: #e67e22;
-        }
-
-        * { box-sizing: border-box; }
-
         body {
             margin: 0;
             font-family: "Segoe UI", Arial, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            background: #f4f6f8;
         }
 
         header {
-            background-color: var(--primary);
-            color: var(--white);
+            background: #0b3c5d;
+            color: white;
             padding: 16px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        .content { display: flex; min-height: calc(100vh - 70px); }
+        .content { display: flex; }
 
         .sidebar {
             width: 220px;
-            background-color: var(--secondary);
-            padding: 20px 0;
-            color: var(--white);
+            background: #1d70a2;
+            padding: 20px;
+            color: white;
         }
 
-        .sidebar h3 {
-            margin: 0;
-            padding: 12px 20px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .sidebar h3:hover { background-color: var(--accent); }
+        .sidebar h3 { cursor: pointer; }
 
         .data { padding: 24px; width: 100%; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: var(--white);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
         }
 
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background-color: var(--primary); color: var(--white); }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background: #0b3c5d; color: white; }
 
         .btn-pdf {
-            background-color: var(--pdf-btn);
+            background: #e67e22;
             color: white;
             border: none;
             padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-
-        .btn-pdf:hover { background-color: #d35400; }
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="left-side">Emergency Response System</div>
-        
-    </header>
 
-    <div class="content">
-        <div class="sidebar">
-            <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
-        </div>
+<header>Emergency Response System</header>
 
-        <div class="data">
-            <h1>Activity Logs</h1>
-            <table id="logsTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Contact Number</th>
-                        <th>Location</th>
-                        <th>Time</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    </tbody>
-            </table>
-        </div>
+<div class="content">
+    <div class="sidebar">
+        <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
     </div>
-<!-- Supabase MUST load first -->
+
+    <div class="data">
+        <h1>Activity Logs</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Location</th>
+                    <th>Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -120,67 +85,108 @@ const { jsPDF } = window.jspdf;
 
 const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
-
 const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ================= LOAD TABLE ================= */
 async function loadLogs() {
 
     const tableBody = document.getElementById("tableBody");
+    tableBody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
 
-    if (!tableBody) {
-        console.error("tableBody not found");
+    const { data, error } = await supa
+        .from('Report')
+        .select('*')
+        .order('id', { ascending: false });
+
+    if (error || !data) {
+        tableBody.innerHTML = "<tr><td colspan='5'>Error Loading</td></tr>";
         return;
     }
 
-    tableBody.innerHTML =
-        "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
+    tableBody.innerHTML = "";
 
-    try {
+    data.forEach(log => {
 
-        const { data, error } = await supa
-            .from('Report')
-            .select('*');
+        const safeData = encodeURIComponent(JSON.stringify(log));
 
-        if (error) throw error;
+        tableBody.innerHTML += `
+            <tr>
+                <td>${log.fullname || '-'}</td>
+                <td>${log.mobile || '-'}</td>
+                <td>${log.location || '-'}</td>
+                <td>${log.datetime || '-'}</td>
+                <td>
+                    <button class="btn-pdf"
+                    onclick="generateOfficialReport('${safeData}')">
+                    Download PDF
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
 
-        tableBody.innerHTML = "";
+/* ================= OFFICIAL PDF ================= */
+function generateOfficialReport(encodedData) {
 
-        if (!data || data.length === 0) {
-            tableBody.innerHTML =
-                "<tr><td colspan='5' style='text-align:center;'>No Data Found</td></tr>";
-            return;
-        }
+    const log = JSON.parse(decodeURIComponent(encodedData));
+    const doc = new jsPDF("p", "mm", "a4");
 
-      data.forEach(log => {
-    tableBody.innerHTML += `
-        <tr>
-            <td>${log.fullname || '-'}</td>
-            <td>${log.mobile || '-'}</td>
-            <td>${log.location || '-'}</td>
-            <td>${log.datetime || '-'}</td>
-            <td>
-                <button class="btn-pdf"
-                onclick="generatePDF(
-                    '${log.fullname}',
-                    '${log.mobile}',
-                    '${log.location}',
-                    '${log.datetime}'
-                )">
-                <i class="fas fa-file-pdf"></i> Download PDF
-                </button>
-            </td>
-        </tr>
+    const reportNumber = "DMA/" + Date.now();
+
+    /* ===== BACKGROUND BASE64 IMAGE ===== */
+    const bgImage = "data:image/jpeg;base64,BASE64_IMAGE_HERE";
+
+    doc.addImage(bgImage, "JPEG", 0, 0, 210, 297);
+
+    doc.setFontSize(16);
+    doc.setFont(undefined, "bold");
+    doc.text("GOVERNMENT OF INDIA", 105, 20, { align: "center" });
+
+    doc.setFontSize(14);
+    doc.text("National Disaster Management Authority", 105, 27, { align: "center" });
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, "normal");
+    doc.text("OFFICIAL INCIDENT REPORT", 105, 35, { align: "center" });
+
+    doc.line(20, 40, 190, 40);
+
+    doc.setFontSize(11);
+
+    const statement = `
+Report Reference No: ${reportNumber}
+
+This is to officially record that an incident was reported by Mr./Ms. ${log.fullname}
+(Contact Number: ${log.mobile}) on ${log.datetime}.
+
+The reported incident location is identified as:
+${log.location}
+
+The report has been registered in the Disaster Monitoring System
+and forwarded to the relevant emergency authorities for action.
+
+Issued By:
+Disaster Monitoring & Control Room
+National Disaster Management Authority
+Government of India
     `;
-});
 
-    } catch (err) {
-        console.error("ERROR:", err);
-        tableBody.innerHTML =
-            "<tr><td colspan='5' style='color:red;'>Error Loading</td></tr>";
-    }
+    doc.text(statement, 20, 50, { maxWidth: 170 });
+
+    doc.setFontSize(10);
+    doc.text(
+        "System Generated Document - No Physical Signature Required",
+        105,
+        285,
+        { align: "center" }
+    );
+
+    doc.save(`Official_Report_${log.fullname || "Incident"}.pdf`);
 }
 
 window.addEventListener("DOMContentLoaded", loadLogs);
 </script>
+
 </body>
 </html>
