@@ -2,7 +2,9 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = "dssm_secret_key";
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -27,6 +29,19 @@ app.post('/submit-report', (req, res) => {
         if (err) return res.status(500).send(err);
         res.send({ status: 'Success' });
     });
+});
+
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    const fixedEmail = "admin@gmail.com";
+    const fixedPassword = "admin@123";
+
+    if (email === fixedEmail && password === fixedPassword) {
+        res.json({ message: "Login successful" });
+    } else {
+        res.status(401).json({ message: "Invalid Email or Password" });
+    }
 });
 
 // Admin Panel la data pathvanyasathi (GET)

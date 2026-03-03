@@ -191,6 +191,7 @@ async function loadLogs() {
                 <td>${log.mobile || '-'}</td>
                 <td>${log.location || '-'}</td>
                 <td>${log.datetime || '-'}</td>
+                
                 <td>
                     <button class="btn-pdf"
                     onclick="generateOfficialReport('${safeData}')">
@@ -234,10 +235,12 @@ function generateOfficialReport(encodedData) {
 Report Reference No: ${reportNumber}
 
 This is to officially record that an incident was reported by Mr./Ms. ${log.fullname}
-(Contact Number: ${log.mobile}) on ${log.datetime}.
+(Contact Number: ${log.mobile}) on ${log.datetime} the type is ${log.disasterType }.
 
 The reported incident location is identified as:
 ${log.location}
+
+The victim gives information is ${log.discription}
 
 The report has been registered in the Disaster Monitoring System
 and forwarded to the relevant emergency authorities for action.

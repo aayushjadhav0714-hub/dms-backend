@@ -55,7 +55,9 @@
                     <tr>
                         <th>Name</th>
                         <th>Mobile</th>
+                        <th>Disaster Type</th>
                         <th>Location</th>
+                        <th>Description</th>
                         <th>Time</th>
                         <th>Action</th>
                     </tr>
@@ -97,7 +99,9 @@
                         <tr>
                             <td>${report.fullname || 'N/A'}</td>
                             <td>${report.mobile || 'N/A'}</td>
+                            <td>${report.disasterType || 'N/A'}</td>
                             <td>${report.location || 'N/A'}</td>
+                            <td>${report.discription || 'N/A'}</td>
                             <td>${report.datetime || 'N/A'}</td>
                             <td>
                                 <button class="btn-delete" onclick="deleteReport(${report.id})">
