@@ -52,17 +52,17 @@ app.get('/get-reports', (req, res) => {
     });
 });
 
-app.listen(3000, () => console.log('Server chalu jhala: http://localhost:3000'));
-// User chi list milvanyasathi (GET)
+app.listen(3000, () => console.log('Server is connected: http://localhost:3000'));
+
 app.get('/get-users', (req, res) => {
-    // Reports table madhun fakt Name, Mobile ani Location ghyayche
+
     const sql = "SELECT fullname, mobile, location FROM reports GROUP BY mobile"; 
     db.query(sql, (err, results) => {
         if (err) return res.status(500).send(err);
         res.json(results);
     });
 });
-// Logs milvanyasathi (GET API)
+
 app.get('/get-logs', (req, res) => {
     // Sarva reports chi list id nusar dakhva (Latest first)
     const sql = "SELECT fullname, mobile, location, datetime FROM reports ORDER BY id DESC"; 

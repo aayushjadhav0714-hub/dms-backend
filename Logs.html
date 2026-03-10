@@ -1,131 +1,158 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Disaster Management Dashboard - Logs</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-   <style>
-        :root {
-            --primary: #0b3c5d;
-            --secondary: #1d70a2;
-            --accent: #c0392b;
-            --bg-light: #f4f6f8;
-            --text-dark: #2c3e50;
-            --white: #ffffff;
-        }
+<title>Disaster Management Dashboard - Logs</title>
 
-        * {
-            box-sizing: border-box;
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-        }
+<style>
 
-        /* Header */
-        header {
-            background-color: var(--primary);
-            color: var(--white);
-            padding: 16px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+:root{
+--primary:#0b3c5d;
+--secondary:#1d70a2;
+--accent:#c0392b;
+--bg:#f4f6f8;
+--white:#fff;
+}
 
-        .left-side {
-            font-size: 20px;
-            font-weight: 600;
-        }
+body{
+margin:0;
+font-family:Segoe UI;
+background:var(--bg);
+}
 
-        .right-side {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+header{
+background:var(--primary);
+color:white;
+padding:16px 30px;
+font-size:20px;
+}
 
-        .right-side button {
-            background-color: var(--accent);
-            color: var(--white);
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+.content{
+display:flex;
+min-height:100vh;
+}
 
-        .right-side i {
-            font-size: 20px;
-            cursor: pointer;
-        }
+.sidebar{
+width:220px;
+background:var(--secondary);
+color:white;
+padding:20px 0;
+}
 
-        /* Layout */
-        .content {
-            display: flex;
-            min-height: calc(100vh - 70px);
-        }
+.sidebar h3{
+padding:12px 20px;
+cursor:pointer;
+}
 
-        /* Sidebar */
-        .sidebar {
-            width: 220px;
-            background-color: var(--secondary);
-            padding: 20px 0;
-            color: var(--white);
-        }
+.sidebar h3:hover{
+background:var(--accent);
+}
 
-        .sidebar h3 {
-            margin: 0;
-            padding: 12px 20px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+.data{
+padding:25px;
+width:100%;
+}
 
-        .sidebar h3:hover {
-            background-color: var(--accent);
-            border-radius: 7px;
-            width: 100%;
-        }
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
 
-        /* Main Data Area */
-        .data {
-            padding: 24px;
-            width: 100%;
-        }
+th,td{
+padding:12px;
+border-bottom:1px solid #ddd;
+}
 
-        .data h1 {
-            margin-bottom: 20px;
-        }
+th{
+background:var(--primary);
+color:white;
+}
 
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--white);
-        }
+button{
+border:none;
+padding:7px 12px;
+border-radius:4px;
+cursor:pointer;
+}
 
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
+.btn-pdf{
+background:#e67e22;
+color:white;
+}
 
-        th {
-            background-color: var(--primary);
-            color: var(--white);
-        }
-        .btn-pdf {
-            background: #e67e22;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-    </style>
+.btn-view{
+background:#3498db;
+color:white;
+}
+
+/* ===== MODAL ===== */
+
+.modal{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.55);
+backdrop-filter:blur(4px);
+display:none;
+justify-content:center;
+align-items:center;
+
+}
+
+.modal-card{
+
+width:650px;
+background:white;
+border-radius:10px;
+box-shadow:0 10px 40px rgba(0,0,0,0.3);
+overflow:hidden;
+
+}
+
+.modal-header{
+
+background:var(--primary);
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+
+}
+
+.modal-body{
+
+padding:25px;
+line-height:1.6;
+
+}
+
+.close{
+cursor:pointer;
+font-size:20px;
+}
+
+.section{
+
+margin-bottom:15px;
+
+}
+
+.title{
+
+font-weight:bold;
+color:#0b3c5d;
+
+}
+
+</style>
+
 </head>
 
 <body>
@@ -133,114 +160,235 @@
 <header>Emergency Response System</header>
 
 <div class="content">
-    <div class="sidebar">
-         <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
-    </div>
 
-    <div class="data">
-        <h1>Activity Logs</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Contact</th>
-                    <th>Location</th>
-                    <th>Time</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-    </div>
+<div class="sidebar">
+<h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
 </div>
+
+<div class="data">
+
+<h1>Activity Logs</h1>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Name</th>
+<th>Contact</th>
+<th>Location</th>
+<th>Time</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ================= POPUP ================= -->
+
+<div class="modal" id="detailsModal">
+
+<div class="modal-card">
+
+<div class="modal-header">
+
+<b>Official Incident Report</b>
+
+<span class="close" onclick="closeModal()">✖</span>
+
+</div>
+
+<div class="modal-body" id="reportContent"></div>
+
+</div>
+
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+
 const { jsPDF } = window.jspdf;
 
-const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
-const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://idogfmuksxbjjmrfdclk.supabase.co';
+const SUPABASE_KEY='sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
+
+const supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 
 /* ================= LOAD TABLE ================= */
-async function loadLogs() {
 
-    const tableBody = document.getElementById("tableBody");
-    tableBody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+async function loadLogs(){
 
-    const { data, error } = await supa
-        .from('Report')
-        .select('*')
-        .order('id', { ascending: false });
+const tableBody=document.getElementById("tableBody");
 
-    if (error || !data) {
-        tableBody.innerHTML = "<tr><td colspan='5'>Error Loading</td></tr>";
-        return;
-    }
+tableBody.innerHTML="<tr><td colspan='5'>Loading...</td></tr>";
 
-    tableBody.innerHTML = "";
+const {data,error}=await supa
+.from('Report')
+.select('*')
+.order('id',{ascending:false});
 
-    data.forEach(log => {
+if(error){
 
-        const safeData = encodeURIComponent(JSON.stringify(log));
+tableBody.innerHTML="<tr><td colspan='5'>Error Loading</td></tr>";
+return;
 
-        tableBody.innerHTML += `
-            <tr>
-                <td>${log.fullname || '-'}</td>
-                <td>${log.mobile || '-'}</td>
-                <td>${log.location || '-'}</td>
-                <td>${log.datetime || '-'}</td>
-                
-                <td>
-                    <button class="btn-pdf"
-                    onclick="generateOfficialReport('${safeData}')">
-                    Download PDF
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
 }
 
-/* ================= OFFICIAL PDF ================= */
-function generateOfficialReport(encodedData) {
+tableBody.innerHTML="";
 
-    const log = JSON.parse(decodeURIComponent(encodedData));
-    const doc = new jsPDF("p", "mm", "a4");
+data.forEach(log=>{
 
-    const reportNumber = "DMA/" + Date.now();
+const safeData=encodeURIComponent(JSON.stringify(log));
 
-    /* ===== BACKGROUND BASE64 IMAGE ===== */
-    const bgImage = "data:image/jpeg;base64,BASE64_IMAGE_HERE";
+tableBody.innerHTML+=`
 
-    doc.addImage(bgImage, "JPEG", 0, 0, 210, 297);
+<tr>
 
-    doc.setFontSize(16);
-    doc.setFont(undefined, "bold");
-    doc.text("GOVERNMENT OF INDIA", 105, 20, { align: "center" });
+<td>${log.fullname || '-'}</td>
+<td>${log.mobile || '-'}</td>
+<td>${log.location || '-'}</td>
+<td>${log.datetime || '-'}</td>
 
-    doc.setFontSize(14);
-    doc.text("National Disaster Management Authority", 105, 27, { align: "center" });
+<td>
 
-    doc.setFontSize(12);
-    doc.setFont(undefined, "normal");
-    doc.text("OFFICIAL INCIDENT REPORT", 105, 35, { align: "center" });
+<button class="btn-pdf"
+onclick="generateOfficialReport('${safeData}')">
+Download PDF
+</button>
 
-    doc.line(20, 40, 190, 40);
+<button class="btn-view"
+onclick="showDetails('${safeData}')">
+View Details
+</button>
 
-    doc.setFontSize(11);
+</td>
 
-    const statement = `
+</tr>
+
+`;
+
+});
+
+}
+
+
+/* ================= VIEW DETAILS ================= */
+
+function showDetails(encodedData){
+
+const log=JSON.parse(decodeURIComponent(encodedData));
+
+const reportNumber="DMA/"+Date.now();
+
+const html=`
+
+<div class="section">
+<span class="title">Report Reference No:</span>
+${reportNumber}
+</div>
+
+<div class="section">
+<span class="title">Reported By:</span>
+${log.fullname}
+</div>
+
+<div class="section">
+<span class="title">Contact:</span>
+${log.mobile}
+</div>
+
+<div class="section">
+<span class="title">Incident Time:</span>
+${log.datetime}
+</div>
+
+<div class="section">
+<span class="title">Disaster Type:</span>
+${log.disasterType}
+</div>
+
+<div class="section">
+<span class="title">Location:</span>
+${log.location}
+</div>
+
+<div class="section">
+<span class="title">Description:</span>
+${log.discription}
+</div>
+
+<div class="section">
+<span class="title">Issued By:</span><br>
+Disaster Monitoring & Control Room<br>
+National Disaster Management Authority<br>
+Government of India
+</div>
+
+`;
+
+document.getElementById("reportContent").innerHTML=html;
+
+document.getElementById("detailsModal").style.display="flex";
+
+}
+
+
+/* ================= CLOSE MODAL ================= */
+
+function closeModal(){
+
+document.getElementById("detailsModal").style.display="none";
+
+}
+
+
+/* ================= PDF GENERATION ================= */
+
+function generateOfficialReport(encodedData){
+
+const log = JSON.parse(decodeURIComponent(encodedData));
+
+const doc = new jsPDF("p","mm","a4");
+
+const reportNumber = "DMA/" + Date.now();
+
+doc.setFontSize(16);
+doc.setFont(undefined,"bold");
+doc.text("GOVERNMENT OF INDIA",105,20,{align:"center"});
+
+doc.setFontSize(14);
+doc.text("National Disaster Management Authority",105,27,{align:"center"});
+
+doc.setFontSize(12);
+doc.setFont(undefined,"normal");
+doc.text("OFFICIAL INCIDENT REPORT",105,35,{align:"center"});
+
+doc.line(20,40,190,40);
+
+doc.setFontSize(11);
+
+const statement = `
 Report Reference No: ${reportNumber}
 
 This is to officially record that an incident was reported by Mr./Ms. ${log.fullname}
-(Contact Number: ${log.mobile}) on ${log.datetime} the type is ${log.disasterType }.
+(Contact Number: ${log.mobile}) on ${log.datetime} and the type is ${log.disasterType}.
 
 The reported incident location is identified as:
 ${log.location}
 
-The victim gives information is ${log.discription}
+The victim gives information is:
+${log.discription}
 
 The report has been registered in the Disaster Monitoring System
 and forwarded to the relevant emergency authorities for action.
@@ -249,22 +397,25 @@ Issued By:
 Disaster Monitoring & Control Room
 National Disaster Management Authority
 Government of India
-    `;
+`;
 
-    doc.text(statement, 20, 50, { maxWidth: 170 });
+doc.text(statement,20,50,{maxWidth:170});
 
-    doc.setFontSize(10);
-    doc.text(
-        "System Generated Document - No Physical Signature Required",
-        105,
-        285,
-        { align: "center" }
-    );
+doc.setFontSize(10);
 
-    doc.save(`Official_Report_${log.fullname || "Incident"}.pdf`);
+doc.text(
+"System Generated Document - No Physical Signature Required",
+105,
+285,
+{align:"center"}
+);
+
+doc.save(`Official_Report_${log.fullname || "Incident"}.pdf`);
+
 }
 
-window.addEventListener("DOMContentLoaded", loadLogs);
+window.addEventListener("DOMContentLoaded",loadLogs);
+
 </script>
 
 </body>

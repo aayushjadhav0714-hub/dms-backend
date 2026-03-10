@@ -63,7 +63,7 @@
                     </tr>
                 </thead>
                 <tbody id="reportsTable">
-                    <tr><td colspan="5" class="loading">डेटा लोड होत आहे...</td></tr>
+                    <tr><td colspan="5" class="loading">Data is loading...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -77,7 +77,7 @@
 
         const tableBody = document.getElementById("reportsTable");
 
-        // 1. डेटा लोड करण्याचे फंक्शन
+
         async function loadReports() {
             try {
                 const { data: allReports, error } = await _supabase
@@ -103,34 +103,30 @@
                             <td>${report.location || 'N/A'}</td>
                             <td>${report.discription || 'N/A'}</td>
                             <td>${report.datetime || 'N/A'}</td>
-                            <td>
-                                <button class="btn-delete" onclick="deleteReport(${report.id})">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </td>
+                         
                         </tr>`;
                     tableBody.innerHTML += row;
                 });
 
             } catch (error) {
                 console.error("Error:", error.message);
-                tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>डेटा लोड करताना चूक झाली! पॉलिसी चेक करा.</td></tr>";
+                tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Data can't be loading please check policies</td></tr>";
             }
         }
 
-        // 2. रिपोर्ट डिलीट करण्याचे फंक्शन
+       
         async function deleteReport(id) {
-            if (confirm("तुम्हाला खात्री आहे की हा रिपोर्ट डिलीट करायचा आहे?")) {
+            if (confirm("Are you sure?")) {
                 const { error } = await _supabase
                     .from('Report')
                     .delete()
                     .eq('id', id);
 
                 if (error) {
-                    alert("Delete करताना चूक झाली: " + error.message);
+                    alert("Error Occured: " + error.message);
                 } else {
-                    alert("रिपोर्ट यशस्वीपणे डिलीट केला!");
-                    loadReports(); // टेबल रिफ्रेश करा
+                    alert("Report deleted successfully!");
+                    loadReports(); 
                 }
             }
         }
