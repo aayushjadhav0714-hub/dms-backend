@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>National Disaster Management Portal | Govt. of India</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+ :root { 
+            --primary: #0b3c5d; 
+            --secondary: #1d70a2; 
+            --accent: #c0392b; 
+            --bg-light: #f4f6f8; 
+            --text-dark: #2c3e50; 
+            --white: #ffffff; 
+        }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--gov-light);
+    }
+
+  header { background-color: var(--primary); color: var(--white); padding: 16px 30px; justify-content: flex-start; gap: 30px; align-items: center; }
+        
+
+header h1{
+    font-size:18px;
+    font-weight:600;
+}
+
+header i{
+    font-size:20px;
+    cursor:pointer;
+}
+
+
+
+    /* ================== MAP ================== */
+    #map {
+      height: calc(100vh - 100px);
+    }
+
+    /* ================== CONTROL PANEL ================== */
+    .map-controls {
+      position: absolute;
+      top: 110px;
+      left: 24px;
+      background: var(--gov-white);
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: var(--card-shadow);
+      z-index: 1000;
+      min-width: 240px;
+    }
+
+    .map-controls label {
+      font-size: 14px;
+      color: var(--gov-blue);
+      font-weight: 600;
+    }
+
+    .map-controls select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--gov-gray);
+      margin-top: 8px;
+    }
+
+    
+  </style>
+</head>
+
+<body>
+
+<header>
+    <i class="fas fa-arrow-left" onclick="location.href='Dashboard.html'"></i> Emergency Response System
+</header>
+
+<div class="map-controls">
+
+</div>
+
+<div id="map"></div>
+
+
+
+<script>
+  var map = L.map("map").setView([19.0760, 72.8777], 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19
+  }).addTo(map);
+
+  var shelterLayer = L.layerGroup().addTo(map);
+  var affectedLayer = L.layerGroup().addTo(map);
+  var floodLayer = L.layerGroup().addTo(map);
+
+  var mode = "";
+
+  document.getElementById("actionSelect").addEventListener("change", function () {
+    mode = this.value;
+  });
+
+  map.on("click", function (e) {
+    if (!mode) return;
+
+    var latlng = e.latlng;
+
+    if (mode === "shelter") {
+      var name = prompt("Enter Shelter Name") || "Relief Shelter";
+      L.marker(latlng)
+        .bindPopup("<b>Relief Shelter</b><br>" + name)
+        .addTo(shelterLayer);
+    }
+
+    if (mode === "affected") {
+      L.polygon([
+        [latlng.lat + 0.002, latlng.lng - 0.002],
+        [latlng.lat + 0.002, latlng.lng + 0.002],
+        [latlng.lat - 0.002, latlng.lng + 0.002],
+        [latlng.lat - 0.002, latlng.lng - 0.002]
+      ], { color: "#FF9800", fillOpacity: 0.4 })
+        .bindPopup("Affected Area")
+        .addTo(affectedLayer);
+    }
+
+    if (mode === "flood") {
+      L.polygon([
+        [latlng.lat + 0.003, latlng.lng - 0.003],
+        [latlng.lat + 0.003, latlng.lng + 0.003],
+        [latlng.lat - 0.003, latlng.lng + 0.003],
+        [latlng.lat - 0.003, latlng.lng - 0.003]
+      ], { color: "#d32f2f", fillOpacity: 0.45 })
+        .bindPopup("Flood Affected Zone")
+        .addTo(floodLayer);
+    }
+  });
+
+  map.locate({ setView: true, maxZoom: 15 });
+</script>
+
+</body>
+</html>

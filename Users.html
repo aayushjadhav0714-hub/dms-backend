@@ -2,7 +2,9 @@
 <html>
 <head>
     <title>Disaster Management Dashboard</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
@@ -10,173 +12,155 @@
             --secondary: #1d70a2;
             --accent: #c0392b;
             --bg-light: #f4f6f8;
-            --text-dark: #2c3e50;
             --white: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            font-family: "Segoe UI", Arial;
+            background: var(--bg-light);
         }
 
-        /* Header */
         header {
-            background-color: var(--primary);
-            color: var(--white);
-            padding: 16px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .left-side {
+            background: var(--primary);
+            color: white;
+            padding: 16px 25px;
             font-size: 20px;
-            font-weight: 600;
+            font-weight: bold;
         }
 
-        .right-side {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .right-side button {
-            background-color: var(--accent);
-            color: var(--white);
-            border: none;
-            padding: 8px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .right-side i {
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        /* Layout */
         .content {
             display: flex;
-            min-height: calc(100vh - 70px);
         }
 
-        /* Sidebar */
         .sidebar {
             width: 220px;
-            background-color: var(--secondary);
-            padding: 20px 0;
-            color: var(--white);
+            background: var(--secondary);
+            min-height: 100vh;
         }
 
         .sidebar h3 {
             margin: 0;
-            padding: 12px 20px;
-            font-weight: 500;
+            padding: 14px 20px;
+            color: white;
             cursor: pointer;
-            transition: background-color 0.2s ease;
         }
 
         .sidebar h3:hover {
-            background-color: var(--accent);
-            border-radius: 7px;
-            width: 100%;
+            background: var(--accent);
         }
 
-        /* Main Data Area */
         .data {
-            padding: 24px;
+            padding: 25px;
             width: 100%;
         }
 
-        .data h1 {
+        h1 {
             margin-bottom: 20px;
         }
 
-        /* Table */
+        /* 🔥 TABLE DESIGN */
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: var(--white);
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
 
         th {
-            background-color: var(--primary);
-            color: var(--white);
+            background: var(--primary);
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-size: 14px;
         }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        tr:hover {
+            background: #eef5ff;
+            transition: 0.2s;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        /* Badge (optional nice look) */
+        .badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
     </style>
 </head>
 
 <body>
-    <header>
-        <div class="left-side">
-            Emergency Response System
-        </div>
-       
-    </header>
 
-    <div class="content">
-        <div class="sidebar">
-            <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
-        </div>
+<header>
+    Emergency Response System
+</header>
 
-        <div class="data">
-            <h1>Users</h1>
-           
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Contact Number</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Data rows go here -->
-                </tbody>
-            </table>
-        </div>
+<div class="content">
+
+    <div class="sidebar">
+        <h3 onclick="location.href='Dashboard.html'">Dashboard</h3>
     </div>
-</body>
-<!-- Supabase Library (MUST be before using supabase) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <div class="data">
+        <h1>Users</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact Number</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+
+            <tbody id="usersTable">
+                <tr>
+                    <td colspan="3" class="loading">Loading data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
 
 <script>
-/* ================================
-   SUPABASE CONFIG
-================================ */
 const SUPABASE_URL = 'https://idogfmuksxbjjmrfdclk.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_49Wi0aMQU0u1YF4nF3PQvg_WbwUscRs';
 
-const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-/* ================================
-   LOAD USERS FUNCTION
-================================ */
 async function loadUsers() {
 
-    const tableBody = document.querySelector("tbody");
+    const tableBody = document.getElementById("usersTable");
 
-    // Loading state
     tableBody.innerHTML =
-        "<tr><td colspan='3' style='text-align:center;'>Loading data...</td></tr>";
+        "<tr><td colspan='3' class='loading'>Loading data...</td></tr>";
 
     try {
-
-        const { data, error } = await _supabase
-            .from('Report')        // Make sure table name EXACT same aahe
+        const { data, error } = await supa
+            .from('Report')
             .select('*')
             .order('id', { ascending: false });
 
@@ -186,37 +170,30 @@ async function loadUsers() {
 
         if (!data || data.length === 0) {
             tableBody.innerHTML =
-                "<tr><td colspan='3' style='text-align:center;'>No users found.</td></tr>";
+                "<tr><td colspan='3' class='loading'>No users found</td></tr>";
             return;
         }
 
         data.forEach(user => {
-
             const row = `
                 <tr>
                     <td>${user.fullname || '-'}</td>
-                    <td>${user.mobile || '-'}</td>
+                    <td><span class="badge">${user.mobile || '-'}</span></td>
                     <td>${user.location || '-'}</td>
                 </tr>
             `;
-
             tableBody.innerHTML += row;
         });
 
     } catch (err) {
-
-        console.error("Supabase Error:", err);
-
+        console.error(err);
         tableBody.innerHTML =
-            "<tr><td colspan='3' style='text-align:center;color:red;'>Error loading data. Check console.</td></tr>";
+            "<tr><td colspan='3' class='loading' style='color:red;'>Error loading data</td></tr>";
     }
 }
 
-
-/* ================================
-   PAGE LOAD
-================================ */
-window.addEventListener("DOMContentLoaded", loadUsers);
-
+window.onload = loadUsers;
 </script>
+
+</body>
 </html>
