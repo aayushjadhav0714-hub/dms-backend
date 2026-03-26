@@ -2,38 +2,35 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = "dssm_secret_key";
 const app = express();
-
 app.use(cors());
 app.use(bodyParser.json());
 
-// 👇 Static folder (frontend files)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// 👇 Default route → login page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// 👇 MySQL Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: '', 
     database: 'disaster_db'
 });
 
 db.connect(err => {
-    if (err) {
-        console.error('DB Error: ' + err.stack);
-        return;
-    }
+    if (err) { console.error('Error connecting: ' + err.stack); return; }
     console.log('MySQL Connected!');
 });
 
-// ===================== LOGIN =====================
+// User kadun data ghenyasathi (POST)
+app.post('/submit-report', (req, res) => {
+    const { fullname, mobile, disasterType, location, datetime, description } = req.body;
+    const sql = "INSERT INTO reports (fullname, mobile, disasterType, location, datetime, description) VALUES (?, ?, ?, ?, ?, ?)";
+    db.query(sql, [fullname, mobile, disasterType, location, datetime, description], (err, result) => {
+        if (err) return res.status(500).send(err);
+        res.send({ status: 'Success' });
+    });
+});
+
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
@@ -47,23 +44,7 @@ app.post('/login', (req, res) => {
     }
 });
 
-// ===================== SUBMIT REPORT =====================
-app.post('/submit-report', (req, res) => {
-    const { fullname, mobile, disasterType, location, datetime, description } = req.body;
-
-    const sql = `
-        INSERT INTO reports 
-        (fullname, mobile, disasterType, location, datetime, description) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    db.query(sql, [fullname, mobile, disasterType, location, datetime, description], (err, result) => {
-        if (err) return res.status(500).send(err);
-        res.send({ status: 'Success' });
-    });
-});
-
-// ===================== GET REPORTS =====================
+// Admin Panel la data pathvanyasathi (GET)
 app.get('/get-reports', (req, res) => {
     db.query("SELECT * FROM reports ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).send(err);
@@ -71,27 +52,22 @@ app.get('/get-reports', (req, res) => {
     });
 });
 
-// ===================== USERS =====================
+app.listen(3000, () => console.log('Server is connected: http://localhost:3000'));
+
 app.get('/get-users', (req, res) => {
-    const sql = "SELECT fullname, mobile, location FROM reports GROUP BY mobile";
 
+    const sql = "SELECT fullname, mobile, location FROM reports GROUP BY mobile"; 
     db.query(sql, (err, results) => {
         if (err) return res.status(500).send(err);
         res.json(results);
     });
 });
 
-// ===================== LOGS =====================
 app.get('/get-logs', (req, res) => {
-    const sql = "SELECT fullname, mobile, location, datetime FROM reports ORDER BY id DESC";
-
+    // Sarva reports chi list id nusar dakhva (Latest first)
+    const sql = "SELECT fullname, mobile, location, datetime FROM reports ORDER BY id DESC"; 
     db.query(sql, (err, results) => {
         if (err) return res.status(500).send(err);
         res.json(results);
     });
-});
-
-// ===================== SERVER =====================
-app.listen(3000, () => {
-    console.log('Server running on http://localhost:3000');
 });
